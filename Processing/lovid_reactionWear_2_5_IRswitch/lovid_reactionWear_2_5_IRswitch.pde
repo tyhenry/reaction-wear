@@ -9,8 +9,8 @@ import processing.video.*;
 /**ARDUINO SERIAL COMM - Tyler Henry**************/
 Serial irPort; //create arduino Serial object
 
-short portIndex = 5; //<--- change this to Arduino serial port!!
-//according to serial port readout in console
+short portIndex = 0; //<--- change this to Arduino serial port!! 
+//according to serial port readout in console - was 5 on Tyler's MBP on 11/21
 
 int serialValue = 0; //data received from arduino
 /*************************************************/
@@ -80,6 +80,8 @@ public void draw() {
     "has contact?: " + contact + "\n"); 
 
   switch(state) {
+  
+  //beginning - "searching" - full screen synth
   case 0 : 
     if ( part[playing].available() ) {
       part[playing].read();
@@ -90,6 +92,8 @@ public void draw() {
       state = 1;
     } 
     break;
+    
+  //circles moving to the right
   case 1 :
     background(255); 
     if ( part[playing].available() ) {
@@ -173,6 +177,8 @@ public void draw() {
       }
     }
     break;
+    
+  //bubble inside bubble
   case 2 :
     if ( part[playing].available() ) {
       part[playing].read();
@@ -182,9 +188,14 @@ public void draw() {
     }
     if (contact) {
       stateCounter = 0;
+      part[playing].volume(1);//unmute this video
+      part[playing+1].volume(0);//mute other video
       image(part[playing],0,0,width,height);      
+      
     } else {
       stateCounter++;
+      part[playing+1].volume(1);//unmute this video
+      part[playing].volume(0);//mute other video
       image(part[playing+1],0,0,width,height);
     } 
     if (stateCounter > NO_COMM_LIMIT) { 
@@ -192,6 +203,8 @@ public void draw() {
       changeMovie(playing, playing+2, 2);
     } 
     break;
+    
+  //boxes  
   case 3 :
     if ( part[playing].available() ) {
       part[playing].read();
@@ -205,17 +218,19 @@ public void draw() {
     if (((height-(height/5)*2)-shrink) > 1) {
       shrink++;
     } else {
+      
+      //switch to tentacles
       println("playing " + playing);
       state = 4;   //<>//
       //changeMovie(playing,playing+2,1);
       part[playing+2].loop();
     } 
     println(((height-(height/5)*2)-shrink));
-
-    
     break;
+    
+  //tentacles
   case 4 :
-  if ( part[playing].available() ) {
+    if ( part[playing].available() ) {
       part[playing].read();
     } 
     if (part[playing+1].available()) {
@@ -224,12 +239,27 @@ public void draw() {
     if ( part[playing+2].available() ) {
       part[playing+2].read();
     }
+    
+    //unmute these videos
+    part[playing+1].volume(1);
+    part[playing].volume(1);
+    //mute other video
+    part[playing+2].volume(0);
+    
     image(part[playing+1], width/5, height/5+shrink/2, width-(width/5)*2, (height-(height/5)*2)-shrink);
     image(part[playing], width/3, height/3, width-(width/3)*2, (height-(height/3)*2));
+
     if (contact) {
       fill(255);
-      textSize(40);
-      text("TENTACLES!", 250, height/2);
+      /*textSize(40);
+      text("TENTACLES!", 250, height/2);*/
+      
+      //unmute this video
+      part[playing+2].volume(1);
+      //mute other video(s)
+      part[playing].volume(0);
+      part[playing+1].volume(0);
+      
       image(part[playing+2], 0, 0, width, height);
     }
     break;
@@ -328,4 +358,10 @@ int readArduinoInt(){
   int ardInt = irPort.read();
   ardInt = irPort.read() * 256 + ardInt;
   return ardInt;
+}
+
+
+//following method makes sketch fullscreen
+boolean sketchFullScreen() {
+  return true; 
 }

@@ -1,4 +1,4 @@
-#define CODE 3000 //length of "mark" in usecs (1 cycle of IR mark @ 38khz ==  26.32 usecs // CODE x 0.038 = # of cycles)
+#define CODE 2000 //length of "mark" in usecs (1 cycle of IR mark @ 38khz ==  26.32 usecs // CODE x 0.038 = # of cycles)
 
 int irLedPin = 9; //IR on Pin 9
 
